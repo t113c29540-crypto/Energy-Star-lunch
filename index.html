@@ -280,6 +280,7 @@
           <div class="field"><label>餐廳電話</label><input type="tel" id="adhocPhone" placeholder="(02)0000-0000"></div>
         </div>
       </div>
+      <div id="platformLink" style="margin-top:8px;"></div>
       <div class="hint" id="menuChipsHint" style="display:none;">點下方菜色可快速帶入點餐欄位 ↓</div>
       <div class="chips" id="menuChips"></div>
     </div>
@@ -400,6 +401,7 @@
         <div class="field grow"><label>餐廳名稱 <span class="req">*</span></label><input type="text" id="newRestoName" placeholder="例:巷口便當"></div>
         <div class="field"><label>電話</label><input type="tel" id="newRestoPhone" placeholder="(02)0000-0000"></div>
       </div>
+      <div class="field"><label>連結(外送平台 / 線上菜單,可留空)</label><input type="text" id="newRestoLink" placeholder="例:https://www.ubereats.com/tw"></div>
       <button class="btn" id="addRestoBtn">新增餐廳 ＋</button>
     </div>
     <div class="card section-pad">
@@ -499,13 +501,27 @@
           {id:uid(),name:"陽春麵",price:50},{id:uid(),name:"乾麵",price:50},
           {id:uid(),name:"滷味拼盤",price:60},{id:uid(),name:"燙青菜",price:40},
         ]},
+        { id:uid(), name:"Uber Eats", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.ubereats.com/tw", platform:true, menu:[] },
+        { id:uid(), name:"foodpanda", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.foodpanda.com.tw/", platform:true, menu:[] },
       ],
       sessions:{},  // keyed by date "YYYY-MM-DD"
       names:[],     // remembered colleague names
-      settings:{ collector:"", linepay:"", jko:"", bank:"", note:"" } // 收款設定
+      settings:{ collector:"", linepay:"", jko:"", bank:"", note:"" }, // 收款設定
+      _platformsSeeded:true
     };
   }
   function defaultSettings(){ return { collector:"", linepay:"", jko:"", bank:"", note:"" }; }
+  function ensurePlatform(d,name,link){
+    if(!Array.isArray(d.restaurants)) d.restaurants=[];
+    if(d.restaurants.some(r=>r.name===name)) return;
+    d.restaurants.push({ id:uid(), name, phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link, platform:true, menu:[] });
+  }
+  function normalizeUrl(u){
+    u=(u||"").trim(); if(!u) return "";
+    if(/^https?:\/\//i.test(u)) return u;
+    if(/^[\w.-]+\.[a-z]{2,}/i.test(u)) return "https://"+u;
+    return "";
+  }
   let DB = loadDB();
   function loadDB(){
     try{
@@ -514,9 +530,15 @@
       const d=JSON.parse(raw);
       if(!d||typeof d!=="object") return defaultData();
       d.restaurants=Array.isArray(d.restaurants)?d.restaurants:[];
+      d.restaurants.forEach(r=>{ if(typeof r.link!=="string") r.link=""; r.platform=!!r.platform; if(!Array.isArray(r.menu)) r.menu=[]; });
       d.sessions=(d.sessions&&typeof d.sessions==="object")?d.sessions:{};
       d.names=Array.isArray(d.names)?d.names:[];
       d.settings=Object.assign(defaultSettings(),(d.settings&&typeof d.settings==="object")?d.settings:{});
+      if(!d._platformsSeeded){
+        ensurePlatform(d,"Uber Eats","https://www.ubereats.com/tw");
+        ensurePlatform(d,"foodpanda","https://www.foodpanda.com.tw/");
+        d._platformsSeeded=true;
+      }
       return d;
     }catch(e){ console.error(e); return defaultData(); }
   }
@@ -580,7 +602,7 @@
     const s=curSession();
     const sel=$("#sessResto");
     let html='<option value="">— 請選擇餐廳 —</option>';
-    DB.restaurants.forEach(r=>{ html+=`<option value="${esc(r.id)}">${esc(r.name)}</option>`; });
+    DB.restaurants.forEach(r=>{ html+=`<option value="${esc(r.id)}">${r.platform?"🛵 ":""}${esc(r.name)}</option>`; });
     html+=`<option value="${ADHOC}">＋ 臨時輸入餐廳…</option>`;
     sel.innerHTML=html;
     sel.value = s?s.restoId:"";
@@ -595,6 +617,24 @@
     $("#adhocFields").style.display = adhoc?"block":"none";
     if(adhoc){ $("#adhocName").value=s.adhocName||""; $("#adhocPhone").value=s.adhocPhone||""; }
     renderMenuChips();
+    renderPlatformLink();
+  }
+
+  function renderPlatformLink(){
+    const s=curSession(); const box=$("#platformLink"); box.innerHTML="";
+    if(!s) return;
+    const r = s.restoId && s.restoId!==ADHOC ? restoById(s.restoId) : null;
+    const href = r ? normalizeUrl(r.link) : "";
+    if(!href) return;
+    const a=document.createElement("a");
+    a.href=href; a.target="_blank"; a.rel="noopener noreferrer";
+    a.className="btn accent sm"; a.style.textDecoration="none";
+    a.textContent=`🛵 開啟 ${r.name} 點餐 →`;
+    box.appendChild(a);
+    const tip=document.createElement("div");
+    tip.className="hint"; tip.style.marginTop="6px";
+    tip.textContent="在外送 App 選好餐後,回到這裡輸入品項與金額即可彙整與分攤。";
+    box.appendChild(tip);
   }
 
   function renderMenuChips(){
@@ -1045,9 +1085,10 @@
   $("#addRestoBtn").addEventListener("click",()=>{
     const name=$("#newRestoName").value.trim();
     const phone=$("#newRestoPhone").value.trim();
+    const link=$("#newRestoLink").value.trim();
     if(!name){ toast("請輸入餐廳名稱","err"); return; }
-    DB.restaurants.push({id:uid(),name,phone,note:"",menu:[]});
-    $("#newRestoName").value=""; $("#newRestoPhone").value="";
+    DB.restaurants.push({id:uid(),name,phone,note:"",link,platform:false,menu:[]});
+    $("#newRestoName").value=""; $("#newRestoPhone").value=""; $("#newRestoLink").value="";
     saveDB(); renderRestoList(); renderRestoSelect();
     toast("已新增餐廳:"+name,"ok");
   });
@@ -1064,11 +1105,12 @@
           <span class="mp">${money(mi.price)}</span>
           <button class="btn-icon del-menu" title="刪除菜色">🗑</button>
         </div>`).join("");
+      const link=normalizeUrl(r.link);
       return `<div class="resto-item" data-rid="${esc(r.id)}">
         <div class="resto-head">
-          <div><span class="nm">${esc(r.name)}</span> <span class="ph">${esc(r.phone||"")}</span></div>
+          <div><span class="nm">${esc(r.name)}</span> ${r.platform?'<span class="badge warn">外送平台</span>':''} <span class="ph">${esc(r.phone||"")}</span>${link?`<br><a href="${esc(link)}" target="_blank" rel="noopener noreferrer" style="color:var(--brand);font-size:12.5px;">🔗 ${esc(r.link)}</a>`:''}</div>
           <div class="btn-row">
-            <button class="btn sm ghost edit-resto">✏️ 改名/電話</button>
+            <button class="btn sm ghost edit-resto">✏️ 編輯</button>
             <button class="btn sm danger del-resto">刪除餐廳</button>
           </div>
         </div>
@@ -1095,7 +1137,8 @@
     if(e.target.closest(".edit-resto")){
       const nn=prompt("餐廳名稱:",r.name); if(nn===null) return;
       const np=prompt("餐廳電話:",r.phone||""); if(np===null) return;
-      r.name=nn.trim()||r.name; r.phone=np.trim();
+      const nl=prompt("連結(外送平台 / 線上菜單,可留空):",r.link||""); if(nl===null) return;
+      r.name=nn.trim()||r.name; r.phone=np.trim(); r.link=nl.trim();
       saveDB(); renderRestoList(); renderRestoSelect(); renderSessionConfig();
       toast("已更新","ok"); return;
     }
@@ -1151,7 +1194,7 @@
         d.restaurants=Array.isArray(d.restaurants)?d.restaurants:[];
         d.restaurants.forEach(nr=>{
           const exists=DB.restaurants.some(r=>r.name===nr.name&&(r.phone||"")===(nr.phone||""));
-          if(!exists) DB.restaurants.push({id:uid(),name:nr.name,phone:nr.phone||"",note:nr.note||"",menu:Array.isArray(nr.menu)?nr.menu.map(m=>({id:uid(),name:m.name,price:num(m.price)})):[]});
+          if(!exists) DB.restaurants.push({id:uid(),name:nr.name,phone:nr.phone||"",note:nr.note||"",link:nr.link||"",platform:!!nr.platform,menu:Array.isArray(nr.menu)?nr.menu.map(m=>({id:uid(),name:m.name,price:num(m.price)})):[]});
         });
         // merge sessions (overwrite by date)
         const ds=(d.sessions&&typeof d.sessions==="object")?d.sessions:{};
@@ -1239,6 +1282,7 @@
     refreshOrderTab();
     renderRestoList();
     renderHistory();
+    saveDB(); // 持久化載入時的正規化與外送平台遷移結果
   }
   init();
 })();
