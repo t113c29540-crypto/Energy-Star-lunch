@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>啟能電子 中午訂餐系統</title>
+<style>
+  :root{
+    --brand:#0B7A6B; --brand-dark:#095e53; --brand-soft:#e6f4f1;
+    --accent:#F2A900; --accent-dark:#c98a00;
+    --bg:#f3f5f7; --card:#ffffff; --text:#1f2937; --muted:#6b7280;
+    --line:#e5e7eb; --line-strong:#d1d5db;
+    --danger:#dc2626; --danger-soft:#fde8e8; --ok:#16a34a; --ok-soft:#e7f6ec;
+    --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04);
+    --shadow-lg:0 10px 25px rgba(16,24,40,.10);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;font-size:16px;}
+  a{color:var(--brand);}
+
+  /* ---------- Header ---------- */
+  header.app{
+    background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+    color:#fff; padding:14px 16px; box-shadow:var(--shadow);
+  }
+  .hdr-wrap{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .logo{
+    width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.16);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    border:1px solid rgba(255,255,255,.25);
+  }
+  .logo svg{width:28px;height:28px;}
+  .hdr-txt{flex:1 1 auto;min-width:180px;}
+  .hdr-txt h1{margin:0;font-size:19px;font-weight:700;letter-spacing:.5px;}
+  .hdr-txt .en{margin:0;font-size:12px;opacity:.85;font-weight:400;}
+  .hdr-meta{font-size:11.5px;opacity:.9;text-align:right;line-height:1.6;min-width:170px;}
+  .hdr-meta div{white-space:nowrap;}
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{
+    background:var(--card);position:sticky;top:0;z-index:30;
+    border-bottom:1px solid var(--line);box-shadow:var(--shadow);
+  }
+  .tabs-wrap{max-width:980px;margin:0 auto;display:flex;overflow-x:auto;}
+  .tab{
+    flex:1 0 auto;padding:13px 10px;border:none;background:none;font-size:15px;
+    color:var(--muted);font-weight:600;border-bottom:3px solid transparent;white-space:nowrap;
+    transition:.15s;
+  }
+  .tab .ic{font-size:17px;margin-right:4px;}
+  .tab.active{color:var(--brand);border-bottom-color:var(--brand);background:var(--brand-soft);}
+  .tab:hover{color:var(--brand);}
+
+  /* ---------- Layout ---------- */
+  main{max-width:980px;margin:0 auto;padding:16px;}
+  .view{display:none;}
+  .view.active{display:block;animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;margin-bottom:16px;box-shadow:var(--shadow);
+  }
+  .card h2{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:8px;}
+  .card h2 .ic{font-size:18px;}
+  .card .sub{color:var(--muted);font-size:13px;margin:0 0 14px;}
+  .card.section-pad{padding:16px 16px 6px;}
+
+  /* ---------- Form ---------- */
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+  .field .req{color:var(--danger);}
+  input[type=text],input[type=tel],input[type=number],input[type=date],input[type=time],select,textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line-strong);border-radius:10px;
+    background:#fff;color:var(--text);outline:none;transition:.15s;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);}
+  textarea{resize:vertical;min-height:46px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .row>.field{flex:1 1 140px;margin-bottom:12px;}
+  .grow{flex:2 1 220px !important;}
+  .narrow{flex:0 0 90px !important;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    padding:10px 16px;border-radius:10px;border:1px solid transparent;
+    font-size:15px;font-weight:600;background:var(--brand);color:#fff;transition:.15s;
+  }
+  .btn:hover{background:var(--brand-dark);}
+  .btn:active{transform:translateY(1px);}
+  .btn.block{width:100%;}
+  .btn.lg{padding:13px 18px;font-size:16px;}
+  .btn.ghost{background:#fff;color:var(--brand);border-color:var(--line-strong);}
+  .btn.ghost:hover{background:var(--brand-soft);}
+  .btn.accent{background:var(--accent);color:#5a3d00;}
+  .btn.accent:hover{background:var(--accent-dark);color:#fff;}
+  .btn.danger{background:#fff;color:var(--danger);border-color:#f3b4b4;}
+  .btn.danger:hover{background:var(--danger-soft);}
+  .btn.sm{padding:6px 11px;font-size:13px;border-radius:8px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-icon{
+    background:none;border:none;padding:5px 7px;border-radius:7px;font-size:16px;line-height:1;color:var(--muted);
+  }
+  .btn-icon:hover{background:var(--bg);color:var(--text);}
+  .btn-icon.del:hover{background:var(--danger-soft);color:var(--danger);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+  /* ---------- Chips ---------- */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .chip{
+    padding:7px 12px;border-radius:999px;border:1px solid var(--line-strong);background:#fff;
+    font-size:14px;color:var(--text);transition:.12s;display:inline-flex;align-items:center;gap:6px;
+  }
+  .chip:hover{border-color:var(--brand);background:var(--brand-soft);}
+  .chip .price{color:var(--muted);font-size:12.5px;}
+  .chip.name-chip{background:var(--brand-soft);border-color:transparent;color:var(--brand-dark);font-weight:600;}
+
+  /* ---------- Tables ---------- */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);}
+  th{font-size:12px;color:var(--muted);font-weight:700;text-transform:none;white-space:nowrap;background:#fafbfc;}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  td.ctr,th.ctr{text-align:center;}
+  tbody tr:hover{background:#fafbfc;}
+  tr.paid-row td{color:var(--muted);}
+  .empty{padding:34px 16px;text-align:center;color:var(--muted);}
+  .empty .big{font-size:40px;margin-bottom:8px;opacity:.5;}
+
+  /* ---------- Summary boxes ---------- */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;}
+  .stat{background:var(--brand-soft);border-radius:12px;padding:14px;text-align:center;}
+  .stat .v{font-size:26px;font-weight:800;color:var(--brand-dark);font-variant-numeric:tabular-nums;}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .stat.amber{background:#fdf3dc;} .stat.amber .v{color:var(--accent-dark);}
+  .stat.red{background:var(--danger-soft);} .stat.red .v{color:var(--danger);}
+  .stat.green{background:var(--ok-soft);} .stat.green .v{color:var(--ok);}
+
+  /* aggregation readable list */
+  .agg-list{margin:0;padding:0;list-style:none;}
+  .agg-list li{
+    display:flex;align-items:baseline;gap:10px;padding:11px 4px;border-bottom:1px dashed var(--line);
+  }
+  .agg-list .nm{font-size:17px;font-weight:700;flex:1 1 auto;}
+  .agg-list .qty{font-size:20px;font-weight:800;color:var(--brand);font-variant-numeric:tabular-nums;}
+  .agg-list .unit{font-size:13px;color:var(--muted);}
+  .agg-list .note{display:block;font-size:13px;color:var(--accent-dark);font-weight:400;margin-top:3px;}
+  .person-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .person-card .ph{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:4px;}
+  .person-card .items{font-size:13.5px;color:var(--muted);}
+
+  pre.callsheet{
+    background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px;font-size:14px;line-height:1.7;
+    white-space:pre-wrap;word-break:break-word;font-family:"Menlo","Consolas","Microsoft JhengHei",monospace;
+    max-height:340px;overflow:auto;
+  }
+
+  /* ---------- Badges & misc ---------- */
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;}
+  .badge.ok{background:var(--ok-soft);color:var(--ok);}
+  .badge.warn{background:#fdf3dc;color:var(--accent-dark);}
+  .badge.off{background:var(--bg);color:var(--muted);}
+  .deadline-bar{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;border-radius:10px;
+    background:var(--brand-soft);font-size:13.5px;font-weight:600;color:var(--brand-dark);margin-bottom:14px;
+  }
+  .deadline-bar.closed{background:var(--danger-soft);color:var(--danger);}
+  .pill-toggle{display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:3px;margin-bottom:12px;}
+  .pill-toggle button{flex:1;border:none;background:none;padding:9px;border-radius:8px;font-weight:600;color:var(--muted);}
+  .pill-toggle button.on{background:#fff;color:var(--brand);box-shadow:var(--shadow);}
+
+  .hint{font-size:12.5px;color:var(--muted);margin-top:6px;}
+  .divider{height:1px;background:var(--line);margin:14px 0;}
+  .inline-edit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+  .resto-item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;}
+  .resto-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .resto-head .nm{font-weight:700;font-size:15px;}
+  .resto-head .ph{font-size:13px;color:var(--muted);}
+  .menu-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line);}
+  .menu-row .mn{flex:1;}
+  .menu-row .mp{width:90px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:#1f2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:14.5px;font-weight:600;
+    box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:.25s;z-index:100;max-width:90vw;text-align:center;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.err{background:var(--danger);}
+  #toast.ok{background:var(--ok);}
+
+  footer.app{max-width:980px;margin:0 auto;padding:18px 16px 40px;color:var(--muted);font-size:12px;text-align:center;line-height:1.8;}
+
+  /* ---------- Print ---------- */
+  @media print{
+    nav.tabs,header.app .hdr-meta,.no-print,.tab,#toast,footer.app{display:none !important;}
+    body{background:#fff;}
+    .view{display:none !important;}
+    .view.active{display:block !important;}
+    .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid;}
+    pre.callsheet{background:#fff;color:#000;border:1px solid #999;max-height:none;}
+    header.app{background:#fff !important;color:#000 !important;border-bottom:2px solid #000;}
+    .logo{display:none;}
+  }
+  @media (max-width:560px){
+    .hdr-meta{text-align:left;width:100%;}
+    .hdr-txt h1{font-size:17px;}
+    .tab{font-size:13.5px;padding:11px 6px;}
+    .tab .ic{display:block;margin:0 0 2px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="hdr-wrap">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/>
+      </svg>
+    </div>
+    <div class="hdr-txt">
+      <h1>啟能電子 · 中午訂餐系統</h1>
+      <p class="en">Energy Star Electronics Co., Ltd.　午餐訂餐 / 叫菜彙總</p>
+    </div>
+    <div class="hdr-meta">
+      <div>☎ (02)8521-6472</div>
+      <div>新北市新莊區新北大道3段3號3樓B5</div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs no-print">
+  <div class="tabs-wrap" id="tabs">
+    <button class="tab active" data-view="order"><span class="ic">🍱</span>今日點餐</button>
+    <button class="tab" data-view="summary"><span class="ic">📞</span>彙總叫菜</button>
+    <button class="tab" data-view="collect"><span class="ic">💰</span>收款催繳</button>
+    <button class="tab" data-view="menu"><span class="ic">🏪</span>餐廳菜單</button>
+    <button class="tab" data-view="data"><span class="ic">💾</span>備份 / 紀錄</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ============ 今日點餐 ============ -->
+  <section class="view active" id="view-order">
+
+    <div class="card">
+      <h2><span class="ic">🍱</span>今日訂餐設定</h2>
+      <p class="sub">先選日期與餐廳,系統會自動帶出該餐廳菜單方便點選。</p>
+      <div class="row">
+        <div class="field narrow" style="flex:0 0 150px !important;">
+          <label>訂餐日期</label>
+          <input type="date" id="sessDate">
+        </div>
+        <div class="field grow">
+          <label>餐廳</label>
+          <select id="sessResto"></select>
+        </div>
+        <div class="field" style="flex:0 0 120px !important;">
+          <label>截止時間</label>
+          <input type="time" id="sessDeadline">
+        </div>
+      </div>
+      <div id="adhocFields" style="display:none;">
+        <div class="row">
+          <div class="field grow"><label>臨時餐廳名稱 <span class="req">*</span></label><input type="text" id="adhocName" placeholder="例:轉角自助餐"></div>
+          <div class="field"><label>餐廳電話</label><input type="tel" id="adhocPhone" placeholder="(02)0000-0000"></div>
+        </div>
+      </div>
+      <div class="hint" id="menuChipsHint" style="display:none;">點下方菜色可快速帶入點餐欄位 ↓</div>
+      <div class="chips" id="menuChips"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">➕</span>新增一筆訂單</h2>
+      <div id="deadlineBar"></div>
+      <div class="field">
+        <label>訂餐人 <span class="req">*</span></label>
+        <input type="text" id="ordPerson" list="nameList" placeholder="輸入姓名" autocomplete="off">
+        <datalist id="nameList"></datalist>
+        <div class="chips" id="nameChips"></div>
+      </div>
+      <div class="row">
+        <div class="field grow"><label>品項 <span class="req">*</span></label><input type="text" id="ordItem" placeholder="例:排骨便當" autocomplete="off"></div>
+        <div class="field narrow"><label>單價</label><input type="number" id="ordPrice" min="0" step="1" placeholder="0"></div>
+        <div class="field narrow"><label>數量</label><input type="number" id="ordQty" min="1" step="1" value="1"></div>
+      </div>
+      <div class="field"><label>備註(辣度、加飯、不要香菜…)</label><input type="text" id="ordNote" placeholder="可留空" autocomplete="off"></div>
+      <button class="btn lg block" id="addOrderBtn">加入訂單　＋</button>
+    </div>
+
+    <div class="card section-pad">
+      <h2><span class="ic">📋</span>今日訂單明細 <span id="orderCountBadge" class="badge off" style="margin-left:auto;">0 筆</span></h2>
+      <div class="tbl-wrap">
+        <table id="orderTable">
+          <thead><tr>
+            <th>訂餐人</th><th>品項</th><th class="num">單價</th><th class="ctr">數量</th>
+            <th class="num">小計</th><th>備註</th><th class="ctr">已付</th><th class="ctr">　</th>
+          </tr></thead>
+          <tbody id="orderBody"></tbody>
+        </table>
+      </div>
+      <div id="orderTotals" style="margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <!-- ============ 彙總叫菜 ============ -->
+  <section class="view" id="view-summary">
+    <div class="card">
+      <h2><span class="ic">📞</span>叫菜彙總</h2>
+      <p class="sub" id="summaryRestoLine">依品項自動加總,打電話給餐廳時照著念即可。</p>
+      <div class="stat-grid" id="summaryStats" style="margin-bottom:16px;"></div>
+      <ul class="agg-list" id="aggList"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">📝</span>叫菜稿(可複製/列印)</h2>
+      <p class="sub">複製後可直接貼到 LINE 群組,或按列印給餐廳。</p>
+      <pre class="callsheet" id="callSheet"></pre>
+      <div class="btn-row no-print" style="margin-top:12px;">
+        <button class="btn accent" id="copyCallBtn">📋 複製叫菜稿</button>
+        <button class="btn ghost" id="printCallBtn">🖨 列印</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">👥</span>每人明細 / 收款</h2>
+      <p class="sub">核對每人點了什麼、要收多少錢。</p>
+      <div id="perPersonWrap"></div>
+      <div class="btn-row no-print" style="margin-top:12px;">
+        <button class="btn ghost" id="copyMoneyBtn">📋 複製收款明細</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 收款催繳 ============ -->
+  <section class="view" id="view-collect">
+    <div class="card">
+      <h2><span class="ic">⚙️</span>收款設定 <span class="badge off" style="margin-left:auto;font-weight:400;">設定一次即可</span></h2>
+      <p class="sub">填好收款方式,之後產生的收款清單與催繳訊息會自動帶入,同事一看就知道怎麼付。</p>
+      <div class="row">
+        <div class="field"><label>收款人(誰收錢)</label><input type="text" id="setCollector" placeholder="例:小明" autocomplete="off"></div>
+        <div class="field grow"><label>LINE Pay 連結 / ID</label><input type="text" id="setLinepay" placeholder="貼上 LINE Pay 收款連結或 ID" autocomplete="off"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>街口 JKO ID</label><input type="text" id="setJko" placeholder="例:@energystar" autocomplete="off"></div>
+        <div class="field grow"><label>匯款帳號 / 其他</label><input type="text" id="setBank" placeholder="例:(某銀行)700 帳號 0000-0000…" autocomplete="off"></div>
+      </div>
+      <div class="field"><label>備註(顯示在訊息最後)</label><input type="text" id="setPayNote" placeholder="例:現金請交給 3F 小明,謝謝大家 🙏" autocomplete="off"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">💰</span>收款進度 · <span id="collectDateLabel"></span></h2>
+      <div class="stat-grid" id="collectStats" style="margin-bottom:14px;"></div>
+      <div class="btn-row no-print" style="margin-bottom:12px;">
+        <button class="btn sm ghost" id="markAllPaidBtn">✔ 全部標記已收</button>
+        <button class="btn sm ghost" id="markAllUnpaidBtn">↺ 全部標記未收</button>
+      </div>
+      <div id="collectPersonWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">📋</span>LINE 收款清單(全部)</h2>
+      <p class="sub">貼到 LINE 群組,每個人看到自己要付多少、怎麼付。🔴=未付　🟢=已付。</p>
+      <pre class="callsheet" id="collectSheet"></pre>
+      <div class="btn-row no-print" style="margin-top:12px;">
+        <button class="btn accent" id="copyCollectBtn">📋 複製收款清單</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">🔔</span>催繳訊息(只列未付的人)</h2>
+      <p class="sub">一鍵產生只列出還沒付款同事的提醒,貼上去就好,不用一個一個追。</p>
+      <pre class="callsheet" id="remindSheet"></pre>
+      <div class="btn-row no-print" style="margin-top:12px;">
+        <button class="btn accent" id="copyRemindBtn">🔔 複製催繳訊息</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 餐廳菜單 ============ -->
+  <section class="view" id="view-menu">
+    <div class="card">
+      <h2><span class="ic">🏪</span>新增常用餐廳</h2>
+      <p class="sub">建立常用餐廳與菜色,之後每天直接挑選即可。</p>
+      <div class="row">
+        <div class="field grow"><label>餐廳名稱 <span class="req">*</span></label><input type="text" id="newRestoName" placeholder="例:巷口便當"></div>
+        <div class="field"><label>電話</label><input type="tel" id="newRestoPhone" placeholder="(02)0000-0000"></div>
+      </div>
+      <button class="btn" id="addRestoBtn">新增餐廳 ＋</button>
+    </div>
+    <div class="card section-pad">
+      <h2><span class="ic">📖</span>餐廳清單</h2>
+      <div id="restoList" style="margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <!-- ============ 備份 / 紀錄 ============ -->
+  <section class="view" id="view-data">
+    <div class="card">
+      <h2><span class="ic">💾</span>資料備份與分享</h2>
+      <p class="sub">本系統資料只存在「這台裝置的瀏覽器」中。要換電腦、備份或分享給同事,請用下方匯出/匯入。</p>
+      <div class="btn-row">
+        <button class="btn" id="exportAllBtn">⬇️ 匯出全部資料(.json)</button>
+        <button class="btn ghost" id="importBtn">⬆️ 匯入資料</button>
+        <button class="btn ghost" id="exportCsvBtn">📄 匯出今日訂單(.csv)</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none;">
+      <p class="hint">匯入時若日期相同會詢問是否覆蓋。CSV 可用 Excel 開啟對帳。</p>
+    </div>
+
+    <div class="card section-pad">
+      <h2><span class="ic">🗂</span>歷史訂餐紀錄</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>日期</th><th>餐廳</th><th class="ctr">筆數</th><th class="num">總額</th><th class="ctr">　</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">⚠️</span>危險區</h2>
+      <p class="sub">以下動作無法復原,請先確認已匯出備份。</p>
+      <div class="btn-row">
+        <button class="btn danger" id="clearTodayBtn">清除今日訂單</button>
+        <button class="btn danger" id="clearAllBtn">清除全部資料(含餐廳)</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app">
+  啟能電子有限公司 Energy Star Electronics Co., Ltd.　|　☎ (02)8521-6472<br>
+  新北市新莊區新北大道3段3號3樓B5　|　午餐訂餐系統 · 資料儲存於本機瀏覽器
+</footer>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+  /* ========================================================= *
+   *  啟能電子 中午訂餐系統  —  純前端 / localStorage 單檔版
+   * ========================================================= */
+  const LS_KEY = "energyStarLunch_v1";
+  const ADHOC = "__adhoc__";
+
+  /* ---------- small utils ---------- */
+  const $  = (s,r=document)=>r.querySelector(s);
+  const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+  const esc = (s)=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const uid = ()=> "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  const money = (n)=> "NT$"+Math.round(Number(n)||0).toLocaleString("en-US");
+  const num = (v)=>{ const n=Number(v); return isFinite(n)?n:0; };
+  function todayStr(){
+    const d=new Date(); const p=x=>String(x).padStart(2,"0");
+    return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+  }
+  function fmtDateZh(s){
+    if(!s) return "";
+    const [y,m,d]=s.split("-"); if(!y||!m||!d) return s;
+    const wk=["日","一","二","三","四","五","六"];
+    const dt=new Date(Number(y),Number(m)-1,Number(d));
+    return `${Number(m)}/${Number(d)} (週${wk[dt.getDay()]})`;
+  }
+  let toastTimer=null;
+  function toast(msg,type=""){
+    const t=$("#toast"); t.textContent=msg; t.className="show "+(type||"");
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.className=t.className.replace("show","").trim();},2200);
+  }
+
+  /* ---------- persistence ---------- */
+  function defaultData(){
+    return {
+      version:1,
+      restaurants:[
+        { id:uid(), name:"巷口便當", phone:"(02)0000-1111", note:"", menu:[
+          {id:uid(),name:"排骨便當",price:90},{id:uid(),name:"雞腿便當",price:100},
+          {id:uid(),name:"焢肉便當",price:85},{id:uid(),name:"魚排便當",price:85},
+          {id:uid(),name:"素食便當",price:75},{id:uid(),name:"控肉飯",price:70},
+        ]},
+        { id:uid(), name:"阿美麵店", phone:"(02)0000-2222", note:"", menu:[
+          {id:uid(),name:"牛肉麵",price:130},{id:uid(),name:"餛飩麵",price:70},
+          {id:uid(),name:"陽春麵",price:50},{id:uid(),name:"乾麵",price:50},
+          {id:uid(),name:"滷味拼盤",price:60},{id:uid(),name:"燙青菜",price:40},
+        ]},
+      ],
+      sessions:{},  // keyed by date "YYYY-MM-DD"
+      names:[],     // remembered colleague names
+      settings:{ collector:"", linepay:"", jko:"", bank:"", note:"" } // 收款設定
+    };
+  }
+  function defaultSettings(){ return { collector:"", linepay:"", jko:"", bank:"", note:"" }; }
+  let DB = loadDB();
+  function loadDB(){
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      if(!raw) return defaultData();
+      const d=JSON.parse(raw);
+      if(!d||typeof d!=="object") return defaultData();
+      d.restaurants=Array.isArray(d.restaurants)?d.restaurants:[];
+      d.sessions=(d.sessions&&typeof d.sessions==="object")?d.sessions:{};
+      d.names=Array.isArray(d.names)?d.names:[];
+      d.settings=Object.assign(defaultSettings(),(d.settings&&typeof d.settings==="object")?d.settings:{});
+      return d;
+    }catch(e){ console.error(e); return defaultData(); }
+  }
+  let saveTimer=null;
+  function saveDB(){
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{
+      try{ localStorage.setItem(LS_KEY,JSON.stringify(DB)); }
+      catch(e){ toast("儲存失敗:瀏覽器空間不足或封鎖了儲存","err"); console.error(e); }
+    },120);
+  }
+
+  /* ---------- session helpers ---------- */
+  let curDate = todayStr();
+  function getSession(date,create){
+    let s=DB.sessions[date];
+    if(!s && create){
+      s={ date, restoId:"", adhocName:"", adhocPhone:"", deadline:"", orders:[] };
+      DB.sessions[date]=s;
+    }
+    return s;
+  }
+  function curSession(create){ return getSession(curDate,create); }
+
+  function restoById(id){ return DB.restaurants.find(r=>r.id===id)||null; }
+  function sessionRestoInfo(s){
+    if(!s) return {name:"",phone:""};
+    if(s.restoId===ADHOC) return {name:s.adhocName||"(臨時餐廳)",phone:s.adhocPhone||""};
+    const r=restoById(s.restoId);
+    return r?{name:r.name,phone:r.phone||""}:{name:"",phone:""};
+  }
+  function isClosed(s){
+    if(!s||!s.deadline) return false;
+    // deadline only restricts when viewing today's session
+    if(s.date!==todayStr()) return s.date<todayStr(); // past day = closed
+    const now=new Date(); const [h,m]=s.deadline.split(":").map(Number);
+    if(isNaN(h)) return false;
+    const dl=new Date(); dl.setHours(h,m||0,0,0);
+    return now>dl;
+  }
+
+  /* ========================================================= *
+   *  TABS
+   * ========================================================= */
+  $("#tabs").addEventListener("click",e=>{
+    const b=e.target.closest(".tab"); if(!b) return;
+    $$(".tab").forEach(t=>t.classList.toggle("active",t===b));
+    const v=b.dataset.view;
+    $$(".view").forEach(sec=>sec.classList.toggle("active",sec.id==="view-"+v));
+    if(v==="summary") renderSummary();
+    if(v==="collect") renderCollect();
+    if(v==="menu") renderRestoList();
+    if(v==="data") renderHistory();
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+  /* ========================================================= *
+   *  ORDER TAB
+   * ========================================================= */
+  function renderRestoSelect(){
+    const s=curSession();
+    const sel=$("#sessResto");
+    let html='<option value="">— 請選擇餐廳 —</option>';
+    DB.restaurants.forEach(r=>{ html+=`<option value="${esc(r.id)}">${esc(r.name)}</option>`; });
+    html+=`<option value="${ADHOC}">＋ 臨時輸入餐廳…</option>`;
+    sel.innerHTML=html;
+    sel.value = s?s.restoId:"";
+  }
+
+  function renderSessionConfig(){
+    const s=curSession();
+    $("#sessDate").value=curDate;
+    renderRestoSelect();
+    $("#sessDeadline").value = s?s.deadline:"";
+    const adhoc = s && s.restoId===ADHOC;
+    $("#adhocFields").style.display = adhoc?"block":"none";
+    if(adhoc){ $("#adhocName").value=s.adhocName||""; $("#adhocPhone").value=s.adhocPhone||""; }
+    renderMenuChips();
+  }
+
+  function renderMenuChips(){
+    const s=curSession(); const box=$("#menuChips"); const hint=$("#menuChipsHint");
+    box.innerHTML="";
+    if(!s){ hint.style.display="none"; return; }
+    const r = s.restoId && s.restoId!==ADHOC ? restoById(s.restoId) : null;
+    if(!r || !r.menu || !r.menu.length){ hint.style.display="none"; return; }
+    hint.style.display="block";
+    r.menu.forEach(mi=>{
+      const c=document.createElement("button");
+      c.type="button"; c.className="chip";
+      c.innerHTML=`${esc(mi.name)} <span class="price">${money(mi.price)}</span>`;
+      c.addEventListener("click",()=>{
+        $("#ordItem").value=mi.name; $("#ordPrice").value=mi.price;
+        $("#ordQty").focus(); $("#ordQty").select();
+      });
+      box.appendChild(c);
+    });
+  }
+
+  function renderNameChips(){
+    const box=$("#nameChips"); box.innerHTML="";
+    const dl=$("#nameList"); dl.innerHTML="";
+    const names=[...DB.names].slice(-24).reverse();
+    names.forEach(n=>{
+      const o=document.createElement("option"); o.value=n; dl.appendChild(o);
+    });
+    names.slice(0,12).forEach(n=>{
+      const c=document.createElement("button");
+      c.type="button"; c.className="chip name-chip"; c.textContent=n;
+      c.addEventListener("click",()=>{ $("#ordPerson").value=n; $("#ordItem").focus(); });
+      box.appendChild(c);
+    });
+  }
+  function rememberName(n){
+    n=(n||"").trim(); if(!n) return;
+    DB.names=DB.names.filter(x=>x!==n); DB.names.push(n);
+    if(DB.names.length>60) DB.names=DB.names.slice(-60);
+  }
+
+  function renderDeadlineBar(){
+    const s=curSession(); const bar=$("#deadlineBar");
+    if(!s||!s.deadline){ bar.innerHTML=""; return; }
+    const closed=isClosed(s);
+    bar.className="deadline-bar"+(closed?" closed":"");
+    bar.innerHTML = closed
+      ? `🔒 已超過截止時間 ${esc(s.deadline)},如需補單請自行確認餐廳是否仍可加。`
+      : `⏰ 今日截止時間 <b>${esc(s.deadline)}</b>,請提早完成點餐。`;
+  }
+
+  function renderOrders(){
+    const s=curSession(); const body=$("#orderBody");
+    const orders = s?s.orders:[];
+    $("#orderCountBadge").textContent = orders.length+" 筆";
+    $("#orderCountBadge").className = "badge "+(orders.length?"warn":"off");
+    if(!orders.length){
+      body.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="big">🍽️</div>還沒有人點餐,從上方新增第一筆吧!</div></td></tr>`;
+      $("#orderTotals").innerHTML=""; return;
+    }
+    body.innerHTML = orders.map(o=>{
+      const sub=num(o.price)*num(o.qty);
+      return `<tr data-id="${esc(o.id)}" class="${o.paid?"paid-row":""}">
+        <td>${esc(o.person)}</td>
+        <td>${esc(o.item)}</td>
+        <td class="num">${o.price?money(o.price):"—"}</td>
+        <td class="ctr">${esc(o.qty)}</td>
+        <td class="num">${sub?money(sub):"—"}</td>
+        <td>${esc(o.note||"")}</td>
+        <td class="ctr"><input type="checkbox" class="chk-paid" ${o.paid?"checked":""} title="標記已付款"></td>
+        <td class="ctr"><button class="btn-icon del" title="刪除">🗑</button></td>
+      </tr>`;
+    }).join("");
+
+    const totalQty=orders.reduce((a,o)=>a+num(o.qty),0);
+    const totalAmt=orders.reduce((a,o)=>a+num(o.price)*num(o.qty),0);
+    const paidAmt =orders.filter(o=>o.paid).reduce((a,o)=>a+num(o.price)*num(o.qty),0);
+    const unpaid = totalAmt-paidAmt;
+    const people = new Set(orders.map(o=>(o.person||"").trim()).filter(Boolean)).size;
+    $("#orderTotals").innerHTML=`<div class="stat-grid">
+      <div class="stat"><div class="v">${people}</div><div class="l">訂餐人數</div></div>
+      <div class="stat amber"><div class="v">${totalQty}</div><div class="l">總份數</div></div>
+      <div class="stat"><div class="v">${money(totalAmt)}</div><div class="l">總金額</div></div>
+      <div class="stat ${unpaid>0?"red":"green"}"><div class="v">${money(unpaid)}</div><div class="l">${unpaid>0?"待收款":"已收齊"}</div></div>
+    </div>`;
+  }
+
+  function refreshOrderTab(){
+    renderSessionConfig(); renderNameChips(); renderDeadlineBar(); renderOrders();
+  }
+
+  /* ---- session config events ---- */
+  $("#sessDate").addEventListener("change",e=>{
+    curDate=e.target.value||todayStr();
+    // ensure session exists if it had data; otherwise lazy
+    refreshOrderTab();
+  });
+  $("#sessResto").addEventListener("change",e=>{
+    const s=curSession(true); s.restoId=e.target.value;
+    if(s.restoId!==ADHOC){ s.adhocName=""; s.adhocPhone=""; }
+    saveDB(); renderSessionConfig();
+  });
+  $("#sessDeadline").addEventListener("change",e=>{
+    const s=curSession(true); s.deadline=e.target.value; saveDB(); renderDeadlineBar();
+  });
+  $("#adhocName").addEventListener("input",e=>{ const s=curSession(true); s.adhocName=e.target.value; saveDB(); });
+  $("#adhocPhone").addEventListener("input",e=>{ const s=curSession(true); s.adhocPhone=e.target.value; saveDB(); });
+
+  /* ---- add order ---- */
+  function addOrder(){
+    const person=$("#ordPerson").value.trim();
+    const item=$("#ordItem").value.trim();
+    const price=num($("#ordPrice").value);
+    const qty=Math.max(1,Math.floor(num($("#ordQty").value)||1));
+    const note=$("#ordNote").value.trim();
+    if(!person){ toast("請填寫訂餐人姓名","err"); $("#ordPerson").focus(); return; }
+    if(!item){ toast("請填寫品項","err"); $("#ordItem").focus(); return; }
+    const s=curSession(true);
+    s.orders.push({ id:uid(), person, item, price, qty, note, paid:false });
+    rememberName(person);
+    saveDB();
+    // keep person for fast multi-add, clear item fields
+    $("#ordItem").value=""; $("#ordPrice").value=""; $("#ordQty").value="1"; $("#ordNote").value="";
+    renderNameChips(); renderOrders();
+    $("#ordItem").focus();
+    toast(`已加入:${person} 的「${item}」`,"ok");
+  }
+  $("#addOrderBtn").addEventListener("click",addOrder);
+  // Enter on item/price/qty/note adds quickly
+  ["ordItem","ordPrice","ordQty","ordNote"].forEach(id=>{
+    $("#"+id).addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addOrder(); } });
+  });
+
+  /* ---- order table actions (delegated) ---- */
+  $("#orderBody").addEventListener("click",e=>{
+    const del=e.target.closest(".del"); if(!del) return;
+    const tr=e.target.closest("tr"); const id=tr&&tr.dataset.id; if(!id) return;
+    const s=curSession(); if(!s) return;
+    const o=s.orders.find(x=>x.id===id);
+    if(o && !confirm(`刪除「${o.person} - ${o.item}」這筆訂單?`)) return;
+    s.orders=s.orders.filter(x=>x.id!==id);
+    saveDB(); renderOrders();
+    toast("已刪除一筆訂單");
+  });
+  $("#orderBody").addEventListener("change",e=>{
+    const chk=e.target.closest(".chk-paid"); if(!chk) return;
+    const tr=e.target.closest("tr"); const id=tr&&tr.dataset.id; if(!id) return;
+    const s=curSession(); if(!s) return;
+    const o=s.orders.find(x=>x.id===id); if(!o) return;
+    o.paid=chk.checked; saveDB(); renderOrders();
+  });
+
+  /* ========================================================= *
+   *  SUMMARY TAB
+   * ========================================================= */
+  function aggregate(orders){
+    // group by item+price
+    const map=new Map();
+    orders.forEach(o=>{
+      const key=(o.item||"").trim()+"||"+num(o.price);
+      if(!map.has(key)) map.set(key,{item:(o.item||"").trim(),price:num(o.price),qty:0,notes:[]});
+      const g=map.get(key); g.qty+=num(o.qty);
+      if(o.note&&o.note.trim()){
+        const label = o.note.trim()+(o.person?`（${o.person.trim()}）`:"");
+        g.notes.push(label);
+      }
+    });
+    return Array.from(map.values()).sort((a,b)=> b.qty-a.qty || a.item.localeCompare(b.item,"zh-Hant"));
+  }
+
+  function renderSummary(){
+    const s=getSession(curDate,false);
+    const orders=s?s.orders:[];
+    const info=sessionRestoInfo(s);
+    $("#summaryRestoLine").textContent = orders.length
+      ? `餐廳:${info.name||"(未選餐廳)"}　${info.phone||""}　|　日期:${fmtDateZh(curDate)}`
+      : "目前這天還沒有訂單。請先到「今日點餐」新增。";
+
+    const groups=aggregate(orders);
+    const totalQty=orders.reduce((a,o)=>a+num(o.qty),0);
+    const totalAmt=orders.reduce((a,o)=>a+num(o.price)*num(o.qty),0);
+    const people=new Set(orders.map(o=>(o.person||"").trim()).filter(Boolean)).size;
+
+    $("#summaryStats").innerHTML=`
+      <div class="stat"><div class="v">${people}</div><div class="l">訂餐人數</div></div>
+      <div class="stat amber"><div class="v">${totalQty}</div><div class="l">總份數</div></div>
+      <div class="stat"><div class="v">${groups.length}</div><div class="l">品項種類</div></div>
+      <div class="stat green"><div class="v">${money(totalAmt)}</div><div class="l">總金額</div></div>`;
+
+    if(!groups.length){
+      $("#aggList").innerHTML=`<div class="empty"><div class="big">📭</div>尚無訂單可彙總</div>`;
+    }else{
+      $("#aggList").innerHTML=groups.map(g=>{
+        const notes=g.notes.length?`<span class="note">※ ${esc(g.notes.join("；"))}</span>`:"";
+        return `<li><span class="nm">${esc(g.item)}${notes}</span>
+          <span class="qty">${g.qty}</span><span class="unit">份 · 單價${g.price?money(g.price):"—"}</span></li>`;
+      }).join("");
+    }
+
+    $("#callSheet").textContent = buildCallSheet(s,groups,totalQty,totalAmt);
+    renderPerPerson(orders);
+  }
+
+  function buildCallSheet(s,groups,totalQty,totalAmt){
+    const info=sessionRestoInfo(s);
+    const L=[];
+    L.push("【啟能電子 中午訂餐】");
+    L.push("日期:"+fmtDateZh(curDate));
+    if(info.name) L.push("餐廳:"+info.name+(info.phone?("　電話:"+info.phone):""));
+    L.push("──────────────");
+    if(!groups.length){ L.push("(尚無訂單)"); }
+    groups.forEach(g=>{
+      let line="● "+g.item+" ×"+g.qty;
+      L.push(line);
+      if(g.notes.length) L.push("   ※ "+g.notes.join("；"));
+    });
+    L.push("──────────────");
+    L.push("合計:"+totalQty+" 份　"+money(totalAmt));
+    L.push("送達:啟能電子 "+ "新北市新莊區新北大道3段3號3樓B5");
+    L.push("聯絡:(02)8521-6472");
+    return L.join("\n");
+  }
+
+  function renderPerPerson(orders){
+    const wrap=$("#perPersonWrap");
+    if(!orders.length){ wrap.innerHTML=`<div class="empty">尚無訂單</div>`; return; }
+    const map=new Map();
+    orders.forEach(o=>{
+      const p=(o.person||"(未填名)").trim()||"(未填名)";
+      if(!map.has(p)) map.set(p,{items:[],total:0,paid:true,anyPaidField:false});
+      const g=map.get(p);
+      g.items.push(`${o.item}${num(o.qty)>1?"×"+num(o.qty):""}${o.note?`(${o.note})`:""}`);
+      g.total+=num(o.price)*num(o.qty);
+      if(!o.paid) g.paid=false;
+    });
+    wrap.innerHTML=Array.from(map.entries()).map(([p,g])=>{
+      const badge=g.total<=0?`<span class="badge off">—</span>`
+        :(g.paid?`<span class="badge ok">已付</span>`:`<span class="badge warn">待收 ${money(g.total)}</span>`);
+      return `<div class="person-card">
+        <div class="ph"><span>${esc(p)}</span><span>${money(g.total)}　${badge}</span></div>
+        <div class="items">${esc(g.items.join("、"))}</div>
+      </div>`;
+    }).join("");
+  }
+
+  function buildMoneySheet(orders){
+    const map=new Map();
+    orders.forEach(o=>{
+      const p=(o.person||"(未填名)").trim()||"(未填名)";
+      if(!map.has(p)) map.set(p,{items:[],total:0,paid:true});
+      const g=map.get(p);
+      g.items.push(`${o.item}${num(o.qty)>1?"×"+num(o.qty):""}`);
+      g.total+=num(o.price)*num(o.qty);
+      if(!o.paid) g.paid=false;
+    });
+    const L=["【啟能電子 訂餐收款明細】","日期:"+fmtDateZh(curDate),"──────────────"];
+    let grand=0,unpaid=0;
+    map.forEach((g,p)=>{
+      grand+=g.total; if(!g.paid) unpaid+=g.total;
+      L.push(`${p}　${money(g.total)}　${g.total<=0?"":(g.paid?"✔已付":"待收")}　- ${g.items.join("、")}`);
+    });
+    L.push("──────────────");
+    L.push("總計:"+money(grand)+"　待收:"+money(unpaid));
+    return L.join("\n");
+  }
+
+  /* ---- copy / print ---- */
+  async function copyText(text,okMsg){
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        await navigator.clipboard.writeText(text);
+      }else{
+        const ta=document.createElement("textarea");
+        ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta);
+      }
+      toast(okMsg||"已複製","ok");
+    }catch(e){ toast("複製失敗,請手動選取","err"); console.error(e); }
+  }
+  $("#copyCallBtn").addEventListener("click",()=>copyText($("#callSheet").textContent,"叫菜稿已複製!"));
+  $("#copyMoneyBtn").addEventListener("click",()=>{
+    const s=getSession(curDate,false); const orders=s?s.orders:[];
+    if(!orders.length){ toast("尚無訂單","err"); return; }
+    copyText(buildMoneySheet(orders),"收款明細已複製!");
+  });
+  $("#printCallBtn").addEventListener("click",()=>window.print());
+
+  /* ========================================================= *
+   *  COLLECT TAB  (收款 / 催繳 / LINE 清單)
+   * ========================================================= */
+  function monthDay(s){ const a=String(s).split("-"); return a[1]&&a[2]?(Number(a[1])+"/"+Number(a[2])):s; }
+
+  function personSummary(orders){
+    const map=new Map();
+    orders.forEach(o=>{
+      const p=(o.person||"(未填名)").trim()||"(未填名)";
+      if(!map.has(p)) map.set(p,{name:p,items:[],total:0,paidCount:0,count:0});
+      const g=map.get(p);
+      g.items.push(`${o.item}${num(o.qty)>1?"×"+num(o.qty):""}${o.note?`(${o.note})`:""}`);
+      g.total+=num(o.price)*num(o.qty);
+      g.count++; if(o.paid) g.paidCount++;
+    });
+    return Array.from(map.values()).map(g=>{ g.paid=(g.count>0&&g.paidCount===g.count); return g; });
+  }
+
+  function payMethodsLines(){
+    const st=DB.settings||{}; const L=[];
+    if((st.linepay||"").trim()) L.push("・LINE Pay:"+st.linepay.trim());
+    if((st.jko||"").trim())     L.push("・街口 JKO:"+st.jko.trim());
+    if((st.bank||"").trim())    L.push("・"+st.bank.trim());
+    L.push((st.collector||"").trim()?("・現金請交給 "+st.collector.trim()):"・或付現金");
+    return L;
+  }
+
+  function buildCollectSheet(orders){
+    const people=personSummary(orders).filter(g=>g.total>0);
+    if(!people.length) return "(這天沒有需要收款的訂單)";
+    const due=people.reduce((a,g)=>a+g.total,0);
+    const out=people.filter(g=>!g.paid).reduce((a,g)=>a+g.total,0);
+    const L=[];
+    L.push("【啟能電子 "+monthDay(curDate)+" 訂餐收款】");
+    L.push("共 "+people.length+" 人 · 應收 "+money(due)+(out<due?("　已收 "+money(due-out)):""));
+    L.push("──────────────");
+    people.forEach(g=> L.push((g.paid?"🟢":"🔴")+" "+g.name+"　"+money(g.total)+(g.paid?"　已付✔":"")) );
+    L.push("──────────────");
+    L.push("尚未收款合計:"+money(out));
+    L.push("");
+    L.push("💳 付款方式:");
+    payMethodsLines().forEach(x=>L.push(x));
+    const note=(DB.settings&&DB.settings.note||"").trim(); if(note) L.push(note);
+    return L.join("\n");
+  }
+
+  function buildRemindSheet(orders){
+    const unpaid=personSummary(orders).filter(g=>g.total>0 && !g.paid);
+    if(!personSummary(orders).some(g=>g.total>0)) return "(這天沒有需要收款的訂單)";
+    if(!unpaid.length) return "🎉 太棒了,大家都付清了,沒有需要催繳的!";
+    const out=unpaid.reduce((a,g)=>a+g.total,0);
+    const L=[];
+    L.push("【午餐收款提醒 🙏】"+monthDay(curDate));
+    L.push("還沒收到以下幾位的餐費,今天方便的話給我一下,感恩~");
+    L.push("──────────────");
+    unpaid.forEach(g=> L.push("・"+g.name+"　"+money(g.total)) );
+    L.push("──────────────");
+    L.push("未收合計:"+money(out));
+    L.push("");
+    L.push("💳 付款方式:");
+    payMethodsLines().forEach(x=>L.push(x));
+    const note=(DB.settings&&DB.settings.note||"").trim(); if(note) L.push(note);
+    return L.join("\n");
+  }
+
+  function renderCollect(){
+    const st=DB.settings||defaultSettings();
+    $("#setCollector").value=st.collector||"";
+    $("#setLinepay").value=st.linepay||"";
+    $("#setJko").value=st.jko||"";
+    $("#setBank").value=st.bank||"";
+    $("#setPayNote").value=st.note||"";
+
+    $("#collectDateLabel").textContent=fmtDateZh(curDate);
+    const s=getSession(curDate,false); const orders=s?s.orders:[];
+    const people=personSummary(orders);
+    const billable=people.filter(g=>g.total>0);
+    const due=billable.reduce((a,g)=>a+g.total,0);
+    const got=billable.filter(g=>g.paid).reduce((a,g)=>a+g.total,0);
+    const outstanding=due-got;
+    const paidPeople=billable.filter(g=>g.paid).length;
+
+    $("#collectStats").innerHTML=`
+      <div class="stat"><div class="v">${money(due)}</div><div class="l">應收總額</div></div>
+      <div class="stat green"><div class="v">${money(got)}</div><div class="l">已收</div></div>
+      <div class="stat ${outstanding>0?"red":"green"}"><div class="v">${money(outstanding)}</div><div class="l">未收</div></div>
+      <div class="stat amber"><div class="v">${paidPeople}/${billable.length}</div><div class="l">已付人數</div></div>`;
+
+    const wrap=$("#collectPersonWrap");
+    if(!people.length){
+      wrap.innerHTML=`<div class="empty"><div class="big">🧾</div>這天還沒有訂單,先到「今日點餐」新增。</div>`;
+    }else{
+      wrap.innerHTML=people.map(g=>{
+        const isPaid=g.total>0 && g.paid;
+        const badge = g.total<=0 ? `<span class="badge off">免收</span>`
+          : isPaid ? `<span class="badge ok">已付 ✔</span>` : `<span class="badge warn">待收 ${money(g.total)}</span>`;
+        const btn = g.total<=0 ? "" :
+          `<button class="btn sm ${isPaid?"ghost":"accent"} toggle-paid" data-name="${esc(g.name)}">${isPaid?"改未付":"標記已付"}</button>`;
+        return `<div class="person-card">
+          <div class="ph" style="flex-wrap:wrap;gap:6px;"><span>${esc(g.name)}　<b>${money(g.total)}</b></span>
+            <span style="display:flex;gap:8px;align-items:center;">${badge}${btn}</span></div>
+          <div class="items">${esc(g.items.join("、"))}</div>
+        </div>`;
+      }).join("");
+    }
+    $("#collectSheet").textContent=buildCollectSheet(orders);
+    $("#remindSheet").textContent=buildRemindSheet(orders);
+  }
+
+  function curOrders(){ const s=getSession(curDate,false); return s?s.orders:[]; }
+
+  // toggle a single person's paid state (all their orders)
+  $("#collectPersonWrap").addEventListener("click",e=>{
+    const b=e.target.closest(".toggle-paid"); if(!b) return;
+    const name=b.dataset.name; const s=getSession(curDate,false); if(!s) return;
+    const theirs=s.orders.filter(o=>(((o.person||"(未填名)").trim())||"(未填名)")===name);
+    if(!theirs.length) return;
+    const allPaid=theirs.every(o=>o.paid);
+    theirs.forEach(o=>o.paid=!allPaid);
+    saveDB(); renderCollect(); renderOrders();
+  });
+
+  function setAllPaid(v){
+    const s=getSession(curDate,false);
+    if(!s||!s.orders.length){ toast("這天沒有訂單","err"); return; }
+    s.orders.forEach(o=>o.paid=v); saveDB(); renderCollect(); renderOrders();
+    toast(v?"已全部標記已收":"已全部標記未收","ok");
+  }
+  $("#markAllPaidBtn").addEventListener("click",()=>setAllPaid(true));
+  $("#markAllUnpaidBtn").addEventListener("click",()=>setAllPaid(false));
+
+  // settings inputs -> live save + refresh sheets
+  function bindSetting(id,key){
+    $("#"+id).addEventListener("input",e=>{
+      DB.settings=DB.settings||defaultSettings();
+      DB.settings[key]=e.target.value; saveDB();
+      const orders=curOrders();
+      $("#collectSheet").textContent=buildCollectSheet(orders);
+      $("#remindSheet").textContent=buildRemindSheet(orders);
+    });
+  }
+  bindSetting("setCollector","collector");
+  bindSetting("setLinepay","linepay");
+  bindSetting("setJko","jko");
+  bindSetting("setBank","bank");
+  bindSetting("setPayNote","note");
+
+  $("#copyCollectBtn").addEventListener("click",()=>{
+    if(!curOrders().length){ toast("這天沒有訂單","err"); return; }
+    copyText($("#collectSheet").textContent,"收款清單已複製!");
+  });
+  $("#copyRemindBtn").addEventListener("click",()=>{
+    if(!curOrders().length){ toast("這天沒有訂單","err"); return; }
+    copyText($("#remindSheet").textContent,"催繳訊息已複製!");
+  });
+
+  /* ========================================================= *
+   *  MENU TAB
+   * ========================================================= */
+  $("#addRestoBtn").addEventListener("click",()=>{
+    const name=$("#newRestoName").value.trim();
+    const phone=$("#newRestoPhone").value.trim();
+    if(!name){ toast("請輸入餐廳名稱","err"); return; }
+    DB.restaurants.push({id:uid(),name,phone,note:"",menu:[]});
+    $("#newRestoName").value=""; $("#newRestoPhone").value="";
+    saveDB(); renderRestoList(); renderRestoSelect();
+    toast("已新增餐廳:"+name,"ok");
+  });
+
+  function renderRestoList(){
+    const box=$("#restoList");
+    if(!DB.restaurants.length){
+      box.innerHTML=`<div class="empty"><div class="big">🏪</div>還沒有餐廳,上方新增一家吧!</div>`; return;
+    }
+    box.innerHTML=DB.restaurants.map(r=>{
+      const rows=(r.menu||[]).map(mi=>`
+        <div class="menu-row" data-mid="${esc(mi.id)}">
+          <span class="mn">${esc(mi.name)}</span>
+          <span class="mp">${money(mi.price)}</span>
+          <button class="btn-icon del-menu" title="刪除菜色">🗑</button>
+        </div>`).join("");
+      return `<div class="resto-item" data-rid="${esc(r.id)}">
+        <div class="resto-head">
+          <div><span class="nm">${esc(r.name)}</span> <span class="ph">${esc(r.phone||"")}</span></div>
+          <div class="btn-row">
+            <button class="btn sm ghost edit-resto">✏️ 改名/電話</button>
+            <button class="btn sm danger del-resto">刪除餐廳</button>
+          </div>
+        </div>
+        ${rows||'<div class="hint">尚無菜色</div>'}
+        <div class="menu-row" style="border-top:1px solid var(--line);padding-top:10px;">
+          <input type="text" class="add-mname" placeholder="菜色名稱" style="flex:1;">
+          <input type="number" class="add-mprice" placeholder="價格" min="0" step="1" style="width:90px;">
+          <button class="btn sm add-menu">＋ 加菜色</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  $("#restoList").addEventListener("click",e=>{
+    const item=e.target.closest(".resto-item"); if(!item) return;
+    const rid=item.dataset.rid; const r=restoById(rid); if(!r) return;
+
+    if(e.target.closest(".del-resto")){
+      if(!confirm(`刪除餐廳「${r.name}」及其菜單?`)) return;
+      DB.restaurants=DB.restaurants.filter(x=>x.id!==rid);
+      saveDB(); renderRestoList(); renderRestoSelect(); renderSessionConfig();
+      toast("已刪除餐廳"); return;
+    }
+    if(e.target.closest(".edit-resto")){
+      const nn=prompt("餐廳名稱:",r.name); if(nn===null) return;
+      const np=prompt("餐廳電話:",r.phone||""); if(np===null) return;
+      r.name=nn.trim()||r.name; r.phone=np.trim();
+      saveDB(); renderRestoList(); renderRestoSelect(); renderSessionConfig();
+      toast("已更新","ok"); return;
+    }
+    if(e.target.closest(".add-menu")){
+      const mn=item.querySelector(".add-mname").value.trim();
+      const mp=num(item.querySelector(".add-mprice").value);
+      if(!mn){ toast("請輸入菜色名稱","err"); return; }
+      r.menu=r.menu||[]; r.menu.push({id:uid(),name:mn,price:mp});
+      saveDB(); renderRestoList(); renderMenuChips();
+      toast("已加入菜色:"+mn,"ok"); return;
+    }
+    if(e.target.closest(".del-menu")){
+      const mrow=e.target.closest(".menu-row"); const mid=mrow&&mrow.dataset.mid; if(!mid) return;
+      r.menu=(r.menu||[]).filter(m=>m.id!==mid);
+      saveDB(); renderRestoList(); renderMenuChips(); return;
+    }
+  });
+  // Enter in add-menu price triggers add
+  $("#restoList").addEventListener("keydown",e=>{
+    if(e.key!=="Enter") return;
+    if(e.target.classList.contains("add-mname")||e.target.classList.contains("add-mprice")){
+      e.preventDefault();
+      const item=e.target.closest(".resto-item");
+      item&&item.querySelector(".add-menu").click();
+    }
+  });
+
+  /* ========================================================= *
+   *  DATA TAB  (backup / history / danger)
+   * ========================================================= */
+  function download(filename,text,mime){
+    const blob=new Blob([text],{type:mime||"text/plain;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }
+  $("#exportAllBtn").addEventListener("click",()=>{
+    download(`啟能訂餐備份_${todayStr()}.json`, JSON.stringify(DB,null,2), "application/json;charset=utf-8");
+    toast("已匯出全部資料","ok");
+  });
+  $("#importBtn").addEventListener("click",()=>$("#importFile").click());
+  $("#importFile").addEventListener("change",e=>{
+    const file=e.target.files&&e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const d=JSON.parse(reader.result);
+        if(!d||typeof d!=="object"||!("restaurants" in d)||!("sessions" in d))
+          throw new Error("格式不符");
+        if(!confirm("匯入將「合併」資料:餐廳會附加、相同日期的訂單會被匯入檔覆蓋。確定匯入?")){ e.target.value=""; return; }
+        // merge restaurants (append, dedupe by name+phone)
+        d.restaurants=Array.isArray(d.restaurants)?d.restaurants:[];
+        d.restaurants.forEach(nr=>{
+          const exists=DB.restaurants.some(r=>r.name===nr.name&&(r.phone||"")===(nr.phone||""));
+          if(!exists) DB.restaurants.push({id:uid(),name:nr.name,phone:nr.phone||"",note:nr.note||"",menu:Array.isArray(nr.menu)?nr.menu.map(m=>({id:uid(),name:m.name,price:num(m.price)})):[]});
+        });
+        // merge sessions (overwrite by date)
+        const ds=(d.sessions&&typeof d.sessions==="object")?d.sessions:{};
+        Object.keys(ds).forEach(k=>{ DB.sessions[k]=ds[k]; });
+        // merge names
+        if(Array.isArray(d.names)) d.names.forEach(n=>rememberName(n));
+        // merge settings: only fill empty fields, keep current values
+        if(d.settings&&typeof d.settings==="object"){
+          DB.settings=DB.settings||defaultSettings();
+          ["collector","linepay","jko","bank","note"].forEach(k=>{
+            if(!(DB.settings[k]||"").trim() && (d.settings[k]||"").trim()) DB.settings[k]=d.settings[k];
+          });
+        }
+        saveDB();
+        refreshOrderTab(); renderRestoList(); renderHistory();
+        toast("匯入完成","ok");
+      }catch(err){ toast("匯入失敗:檔案格式不正確","err"); console.error(err); }
+      e.target.value="";
+    };
+    reader.readAsText(file);
+  });
+
+  $("#exportCsvBtn").addEventListener("click",()=>{
+    const s=getSession(curDate,false); const orders=s?s.orders:[];
+    if(!orders.length){ toast("今日沒有訂單可匯出","err"); return; }
+    const info=sessionRestoInfo(s);
+    const rows=[["日期","餐廳","訂餐人","品項","單價","數量","小計","備註","已付"]];
+    orders.forEach(o=>rows.push([curDate,info.name,o.person,o.item,num(o.price),num(o.qty),num(o.price)*num(o.qty),o.note||"",o.paid?"是":"否"]));
+    const csv="﻿"+rows.map(r=>r.map(c=>{
+      const v=String(c==null?"":c);
+      return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
+    }).join(",")).join("\r\n");
+    download(`啟能訂單_${curDate}.csv`,csv,"text/csv;charset=utf-8");
+    toast("已匯出 CSV","ok");
+  });
+
+  function renderHistory(){
+    const body=$("#historyBody");
+    const keys=Object.keys(DB.sessions).filter(k=>DB.sessions[k]&&DB.sessions[k].orders&&DB.sessions[k].orders.length)
+      .sort((a,b)=>b.localeCompare(a));
+    if(!keys.length){ body.innerHTML=`<tr><td colspan="5"><div class="empty">尚無歷史紀錄</div></td></tr>`; return; }
+    body.innerHTML=keys.map(k=>{
+      const s=DB.sessions[k]; const info=sessionRestoInfo(s);
+      const amt=s.orders.reduce((a,o)=>a+num(o.price)*num(o.qty),0);
+      return `<tr>
+        <td>${esc(fmtDateZh(k))}<br><span class="hint">${esc(k)}</span></td>
+        <td>${esc(info.name||"—")}</td>
+        <td class="ctr">${s.orders.length}</td>
+        <td class="num">${money(amt)}</td>
+        <td class="ctr"><button class="btn sm ghost view-day" data-d="${esc(k)}">查看</button></td>
+      </tr>`;
+    }).join("");
+  }
+  $("#historyBody").addEventListener("click",e=>{
+    const b=e.target.closest(".view-day"); if(!b) return;
+    curDate=b.dataset.d;
+    refreshOrderTab();
+    $$(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view==="order"));
+    $$(".view").forEach(v=>v.classList.toggle("active",v.id==="view-order"));
+    window.scrollTo({top:0,behavior:"smooth"});
+    toast("已載入 "+b.dataset.d+" 的訂單");
+  });
+
+  $("#clearTodayBtn").addEventListener("click",()=>{
+    const s=getSession(curDate,false);
+    if(!s||!s.orders.length){ toast("今日沒有訂單","err"); return; }
+    if(!confirm(`確定清除 ${curDate} 的所有訂單(${s.orders.length} 筆)?此動作無法復原。`)) return;
+    s.orders=[]; saveDB(); refreshOrderTab(); renderHistory();
+    toast("已清除今日訂單");
+  });
+  $("#clearAllBtn").addEventListener("click",()=>{
+    if(!confirm("⚠️ 將清除全部資料(餐廳、所有日期訂單)!建議先匯出備份。確定繼續?")) return;
+    if(!confirm("再次確認:這會刪光所有資料且無法復原。真的要清除?")) return;
+    DB=defaultData(); curDate=todayStr(); saveDB();
+    refreshOrderTab(); renderRestoList(); renderHistory();
+    toast("已重置為初始狀態");
+  });
+
+  /* ========================================================= *
+   *  INIT
+   * ========================================================= */
+  function init(){
+    curDate=todayStr();
+    // default deadline suggestion if none set today and session exists? leave blank.
+    refreshOrderTab();
+    renderRestoList();
+    renderHistory();
+  }
+  init();
+})();
+</script>
+</body>
+</html>

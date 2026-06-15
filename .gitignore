@@ -1,0 +1,10 @@
+# 本地預覽設定（Claude Code launch config）
+.claude/
+
+# 本地中文檔名副本（與 index.html 內容相同，避免 repo 重複）
+中午訂餐系統.html
+
+# 系統檔
+Thumbs.db
+desktop.ini
+.DS_Store
