@@ -4,7 +4,7 @@
 
 單一 HTML 檔、純前端、零安裝、可離線。資料只存在使用者瀏覽器的 `localStorage`,**不會上傳到任何伺服器**。
 
-🔗 **線上版**：部署後填入 GitHub Pages 網址（例：`https://<帳號>.github.io/<repo>/`）
+🔗 **線上版（直接用這個）**：<https://t113c29540-crypto.github.io/Energy-Star-lunch/>
 
 ---
 
