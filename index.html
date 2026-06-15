@@ -461,6 +461,7 @@
    * ========================================================= */
   const LS_KEY = "energyStarLunch_v1";
   const ADHOC = "__adhoc__";
+  const SEED_NAMES = ["Peter Chen","Dennis Lin","Tom Huang","Bruce Chang","Iris Chang","Ling Liu","Ken Chien","Qunie Huang","Danny Huang","Wade Chou","Redford Hsu"];
 
   /* ---------- small utils ---------- */
   const $  = (s,r=document)=>r.querySelector(s);
@@ -497,9 +498,10 @@
         { id:uid(), name:"foodpanda", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.foodpanda.com.tw/", platform:true, menu:[] },
       ],
       sessions:{},  // keyed by date "YYYY-MM-DD"
-      names:[],     // remembered colleague names
+      names:SEED_NAMES.slice().reverse(),  // 預設訂餐人名單(反向存,讓快選顯示為列出的順序)
       settings:{ collector:"", linepay:"", jko:"", bank:"", note:"" }, // 收款設定
-      _platformsSeeded:true
+      _platformsSeeded:true,
+      _namesSeeded:true
     };
   }
   function defaultSettings(){ return { collector:"", linepay:"", jko:"", bank:"", note:"" }; }
@@ -515,10 +517,10 @@
     return "";
   }
   // 公司(新莊區新北大道三段3號)附近實際店家 — 範例餐廳種子
-  function realZhengzhong(){ return { name:"正忠排骨飯 新莊中華店", phone:"(02)8992-2222", note:"新莊區中華路一段110號 · 10:30–20:00 · 便當約15種,85~150元,價格以現場為準", link:"", platform:false, menu:[
-    {id:uid(),name:"排骨便當",price:90},{id:uid(),name:"雞腿便當",price:110},
-    {id:uid(),name:"控肉便當",price:90},{id:uid(),name:"魚排便當",price:90},
-    {id:uid(),name:"滷雞腿便當",price:110},
+  function realZhengzhong(){ return { name:"正忠排骨飯 新莊中華店", phone:"(02)8992-2222", note:"新莊區中華路一段110號 · 10:30–20:00 · 約15種便當85~150元,內用免費紅茶/湯品,完整菜單電洽、價格以現場為準", link:"", platform:false, menu:[
+    {id:uid(),name:"排骨飯",price:90},{id:uid(),name:"雞排飯",price:90},
+    {id:uid(),name:"鮮魚飯",price:90},{id:uid(),name:"炸雞腿飯",price:95},
+    {id:uid(),name:"控肉飯",price:90},
   ] }; }
   function realShao(){ return { name:"邵湘湘牛肉麵", phone:"0989-379-137", note:"新莊副都心 思源路593巷6弄10號 · 11:00–20:00,週日休", link:"", platform:false, menu:[
     {id:uid(),name:"A+牛肉麵",price:160},{id:uid(),name:"牛三寶麵",price:190},
@@ -550,6 +552,10 @@
         ensurePlatform(d,"Uber Eats","https://www.ubereats.com/tw");
         ensurePlatform(d,"foodpanda","https://www.foodpanda.com.tw/");
         d._platformsSeeded=true;
+      }
+      if(!d._namesSeeded){
+        SEED_NAMES.slice().reverse().forEach(function(n){ if(d.names.indexOf(n)<0) d.names.push(n); });
+        d._namesSeeded=true;
       }
       migrateExampleRestaurants(d);
       return d;
