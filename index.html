@@ -489,20 +489,22 @@
 
   /* ---------- persistence ---------- */
   function defaultData(){
-    return {
+    const d = {
       version:1,
-      restaurants:[
-        Object.assign({id:uid()}, realZhengzhong()),
-        Object.assign({id:uid()}, realShao()),
-        { id:uid(), name:"Uber Eats", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.ubereats.com/tw", platform:true, menu:[] },
-        { id:uid(), name:"foodpanda", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.foodpanda.com.tw/", platform:true, menu:[] },
-      ],
+      restaurants:[],  // 由 seedDirectory 填入附近實際店家(含正忠、邵湘湘)
       sessions:{},  // keyed by date "YYYY-MM-DD"
       names:SEED_NAMES.slice().reverse(),  // 預設訂餐人名單(反向存,讓快選顯示為列出的順序)
       settings:{ collector:"", linepay:"", jko:"", bank:"", note:"" }, // 收款設定
       _platformsSeeded:true,
-      _namesSeeded:true
+      _namesSeeded:true,
+      _dir1Seeded:false
     };
+    seedDirectory(d);  // 公司附近實際店家(工作流查證)
+    d.restaurants.push(
+      { id:uid(), name:"Uber Eats", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.ubereats.com/tw", platform:true, menu:[] },
+      { id:uid(), name:"foodpanda", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.foodpanda.com.tw/", platform:true, menu:[] }
+    );
+    return d;
   }
   function defaultSettings(){ return { collector:"", linepay:"", jko:"", bank:"", note:"" }; }
   function ensurePlatform(d,name,link){
@@ -536,6 +538,54 @@
       else if(ph==="(02)0000-2222") Object.assign(r, realShao());
     });
   }
+
+  // ===== 公司(新北大道三段3號)周邊約5km、午餐≤NT$300 的實際店家(多代理人工作流查證,2026-06;電話/菜單來自網路來源,價格以現場為準) =====
+  const DIRECTORY = [
+    { n:"正忠排骨飯 新莊中華店", p:"(02)8992-2222", a:"新莊區中華路一段110號", pr:"10:30-20:00,約15種便當85~150,內用免費紅茶/湯品", m:[["排骨飯",90],["雞排飯",90],["鮮魚飯",90],["炸雞腿飯",95],["控肉飯",90]] },
+    { n:"邵湘湘牛肉麵", p:"0989-379-137", a:"新莊區思源路593巷6弄10號(副都心)", pr:"11:00-20:00,週日休", m:[["A+牛肉麵",160],["牛三寶麵",190],["麻婆豆腐燴飯",80],["綜合小菜",60],["涼拌海蜇皮",35],["涼拌小黃瓜",35]] },
+    { n:"伙食餐盒", p:"(02)2277-1196", a:"新莊區復興路一段205號", pr:"單點120-135 / 套餐185-200", m:[["古早紅糟肉便當",120],["蒜泥豬五花便當",120],["泰式椒麻雞便當",135],["油蔥雞腿肉便當",135],["椒麻雞套餐(含飲料水果)",200]] },
+    { n:"後菜園(艋舺腿庫飯)", p:"0975-925-975", a:"新莊區龍安路438號", pr:"飯類約80-110", m:[["腿庫飯",80],["滷排骨飯",80],["滷肉飯",30],["紅燒綜合麵",110],["滷大腸",60]] },
+    { n:"阿奕腿庫飯", p:"(02)2204-3818", a:"新莊區龍安路489號(光華國小對面)", pr:"70-130", m:[["腿庫飯",70],["炸排/滷排飯",80],["燒肉飯",80],["香腸飯",80],["大綜合飯",130]] },
+    { n:"新鴨庄便當", p:"(02)2994-7609", a:"新莊區化成路406號", pr:"100-130", m:[["排骨飯",100],["炸雞腿飯",120],["鴨腿飯",130],["招牌雞腿便當",120],["叉燒(單點)",80]] },
+    { n:"好客雞肉飯 新莊思源店", p:"(02)8991-0555", a:"新莊區思源路415號", pr:"45-100", m:[["雞肉飯(小)",45],["雞肉飯(大)",65],["乾意麵",50],["古早味豬腳",80],["魚肉湯",80]] },
+    { n:"鬍鬚張 新莊思源店", p:"(02)2997-1088", a:"新莊區思源路139號", pr:"35-215", m:[["滷肉飯",35],["雞魯飯",68],["雞魯便當",123],["京饌雞腿便當",194],["原盅四神湯",92]] },
+    { n:"阿忠牛肉麵", p:"(02)8201-9898", a:"新莊區民安西路82號", pr:"40-170", m:[["紅燒牛肉麵",140],["清燉牛肉麵",150],["紅燒半筋半肉麵",170],["手工水餃",50],["滷牛肚",120]] },
+    { n:"中華麵館", p:"0928-031-916", a:"新莊區中華路一段50號", pr:"30-250", m:[["乾意麵(小)",30],["乾粄條(小)",30],["滷肉飯",30],["黑白切(一份)",30],["水餃(10顆)",60]] },
+    { n:"云享小吃店", p:"(02)2990-4596", a:"新莊區中和街114號", pr:"35-75", m:[["高麗菜鍋貼(5顆)",35],["咖哩鍋貼(5顆)",43],["鮮肉抄手",75],["榨菜肉絲麵",55],["菜肉扁食湯",55]] },
+    { n:"旺旺餃子館", p:"(02)2994-0777", a:"新莊區中和街155巷8號", pr:"40-120", m:[["炸醬麵",45],["麻醬麵",40],["牛肉麵",110],["牛肉麵(小碗)",120],["滷味拼盤",100]] },
+    { n:"瑪賀牛肉麵", p:"(02)2277-9522", a:"新莊區福壽街65號", pr:"均消約150", m:[["蕃茄牛肉麵",135],["紅燒大麥克牛肉麵",180],["紅燒牛三寶麵",155],["人氣半筋牛肉麵",195],["涼拌小菜",45]] },
+    { n:"千職人日本料理 新莊店", p:"(02)2990-9321", a:"新莊區中華路一段132號", pr:"午間人均約250", m:[["招牌職人丼",210],["厚切炸豬排丼飯",179],["讚岐海鮮烏龍麵",169],["鮭魚握壽司5貫",200],["99元外帶丼飯",99]] },
+    { n:"すき家 SUKIYA 幸福店", p:"(02)2370-7688", a:"新莊區思源路345號1樓", pr:"59-149", m:[["牛丼(普通)",69],["秋葵牛丼(中)",99],["蔥溫玉牛丼(中)",99],["起司牛丼(超值)",119],["咖哩飯",89]] },
+    { n:"くら寿司 藏壽司 新莊思源路店", p:"(02)2990-1755", a:"新莊區思源路168號", pr:"壽司40/盤,控量可≤300", m:[["握壽司(均一價/盤)",40],["味噌湯",60],["炸蝦天婦羅",60],["海苔章魚燒",80],["釜玉烏龍麵",90]] },
+    { n:"水上米泰式料理", p:"(02)8789-9789", a:"新莊區幸福路821號", pr:"便當120起 / 單點多數≤300", m:[["打拋豬便當",120],["沙嗲烤雞腿餐盒",120],["椒麻雞便當",130],["曼谷蝦醬炒飯",150],["沙嗲雞肉串",190]] },
+    { n:"宥棧越式料理", p:"(02)2277-2920", a:"新莊區幸福路866號", pr:"100-150", m:[["牛肉河粉",120],["炸春捲",100],["香茅雞腿飯",100],["越式烤肉飯",100],["越式酸奶",60]] },
+    { n:"蓮花泰式小吃店", p:"(02)2298-8367", a:"新莊區化成路86號", pr:"均消約280", m:[["泰式炒河粉",100],["打拋豬",120],["涼拌青木瓜",90],["蝦醬空心菜",100],["月亮蝦餅",150]] },
+    { n:"韓味軒韓國料理", p:"(02)2991-1329", a:"新莊區中華路一段182-1號", pr:"主餐200-340(低消約200)", m:[["石鍋拌飯",270],["海鮮煎餅",280],["素食鍋",200],["韓式泡菜鍋",300],["韓式小菜",30]] },
+    { n:"香港鋒元記燒臘", p:"(02)2277-2178", a:"新莊區化成路566號", pr:"80-130", m:[["叉燒便當",80],["廣東臘味飯",90],["招牌飯",100],["脆皮鴨腿飯",100],["豪華六寶飯",120]] },
+    { n:"港宏燒臘", p:"(02)2205-0832", a:"新莊區後港一路127號", pr:"便當均一135", m:[["招牌三寶飯",135],["三燒飯",135],["明爐燒鴨飯",135],["五香雞腿飯",135],["燒肉燒鴨雙拼飯",135]] },
+    { n:"鄭家常家庭餐廳", p:"(02)2277-7703", a:"新莊區中平路183號", pr:"午間套餐220-280", m:[["家常滷肉套餐",240],["香菇蔥燒雞套餐",240],["蔥爆豬肉套餐",220],["牛五花燒肉套餐",280],["馬鈴薯燉肉套餐",250]] },
+    { n:"龍門客棧", p:"(02)8201-7681", a:"新莊區龍安路482號", pr:"人均約200-280", m:[["茶葉炒飯",150],["牛肉麵",130],["排骨麵",110],["牛肉湯餃",90],["熱炒(每盤約)",120]] },
+    { n:"香港榮華燒臘", p:"(02)2203-7072", a:"新莊區新莊路597號(豐年街市場內)", pr:"90-190", m:[["雞腿飯",120],["三寶飯",130],["招牌飯",140],["三燒飯",140],["鴨腿飯",110]] },
+    { n:"丸福早午餐 新莊店", p:"(02)2996-5502", a:"新莊區中誠街167號", pr:"80-240", m:[["長腿姐姐拼盤",240],["莓女與野獸漢堡",190],["檸香塔塔魚排黑麥堡",95],["蘋果鮪魚塔塔吐司",85],["花生培根法式吐司",85]] },
+    { n:"嘿堡哥美式火烤漢堡", p:"(02)8992-9321", a:"新莊區和興街29號", pr:"130-280", m:[["炸雞腿堡",230],["培根起司牛肉堡",220],["花生醬牛肉堡",220],["碳烤雞腿堡套餐",200],["香雞紅醬義大利麵",180]] },
+    { n:"福F Pasta", p:"(02)2990-2671", a:"新莊區幸福路671巷2弄2號", pr:"90-200", m:[["青醬鮭魚麵",145],["蕃茄雞肉麵",135],["青醬雞肉麵",135],["肉醬筆管麵",120],["紐澳良雞翅(4支)",70]] },
+    { n:"寓見。胖 Brunch&Pasta", p:"(02)2277-6977", a:"新莊區中華路二段298號", pr:"多數200-300", m:[["明太子鮮蝦干貝義大利麵",290],["香煎雞腿番茄義大利麵",220],["雙層起司牛肉堡",120],["楓糖法式吐司",90],["薯泥蛋沙拉三明治",80]] },
+  ];
+  function normName(s){ return String(s||"").toLowerCase().replace(/\s+/g,"").replace(/[（）()・·\-–—]/g,""); }
+  function dirToResto(e){
+    return { id:uid(), name:e.n, phone:e.p,
+      note:"新北市"+e.a+(e.pr?(" · "+e.pr):"")+" · 價格以現場為準",
+      link:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(e.n+" 新北市"+e.a),
+      platform:false,
+      menu:(e.m||[]).map(function(x){ return { id:uid(), name:x[0], price:x[1] }; }) };
+  }
+  function seedDirectory(d){
+    if(d._dir1Seeded) return;
+    if(!Array.isArray(d.restaurants)) d.restaurants=[];
+    const have={}; d.restaurants.forEach(function(r){ have[normName(r.name)]=true; });
+    DIRECTORY.forEach(function(e){ var k=normName(e.n); if(have[k]) return; d.restaurants.push(dirToResto(e)); have[k]=true; });
+    d._dir1Seeded=true;
+  }
   let DB = loadDB();
   function loadDB(){
     try{
@@ -558,6 +608,7 @@
         d._namesSeeded=true;
       }
       migrateExampleRestaurants(d);
+      seedDirectory(d);
       return d;
     }catch(e){ console.error(e); return defaultData(); }
   }
@@ -645,14 +696,17 @@
     const r = s.restoId && s.restoId!==ADHOC ? restoById(s.restoId) : null;
     const href = r ? normalizeUrl(r.link) : "";
     if(!href) return;
+    const isPlat = !!r.platform;
     const a=document.createElement("a");
     a.href=href; a.target="_blank"; a.rel="noopener noreferrer";
     a.className="btn accent sm"; a.style.textDecoration="none";
-    a.textContent=`🛵 開啟 ${r.name} 點餐 →`;
+    a.textContent = isPlat ? `🛵 開啟 ${r.name} 點餐 →` : `🔗 ${r.name} 地圖 / 菜單 / 照片 →`;
     box.appendChild(a);
     const tip=document.createElement("div");
     tip.className="hint"; tip.style.marginTop="6px";
-    tip.textContent="在外送 App 選好餐後,回到這裡輸入品項與金額即可彙整與分攤。";
+    tip.textContent = isPlat
+      ? "在外送 App 選好餐後,回到這裡輸入品項與金額即可彙整與分攤。"
+      : "點開可看 Google 地圖、完整菜單、實景照片與一鍵撥號;選好後回來點下方菜色或自行輸入。";
     box.appendChild(tip);
   }
 
@@ -1125,9 +1179,14 @@
           <button class="btn-icon del-menu" title="刪除菜色">🗑</button>
         </div>`).join("");
       const link=normalizeUrl(r.link);
+      const isMaps=/google\.com\/maps/.test(r.link||"");
       return `<div class="resto-item" data-rid="${esc(r.id)}">
         <div class="resto-head">
-          <div><span class="nm">${esc(r.name)}</span> ${r.platform?'<span class="badge warn">外送平台</span>':''} <span class="ph">${esc(r.phone||"")}</span>${link?`<br><a href="${esc(link)}" target="_blank" rel="noopener noreferrer" style="color:var(--brand);font-size:12.5px;">🔗 ${esc(r.link)}</a>`:''}</div>
+          <div>
+            <span class="nm">${esc(r.name)}</span> ${r.platform?'<span class="badge warn">外送平台</span>':''} <span class="ph">${esc(r.phone||"")}</span>
+            ${r.note?`<div class="hint" style="margin-top:3px;">${esc(r.note)}</div>`:''}
+            ${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer" style="color:var(--brand);font-size:12.5px;">🔗 ${isMaps?'Google 地圖 · 菜單 · 照片 · 電話':esc(r.link)}</a>`:''}
+          </div>
           <div class="btn-row">
             <button class="btn sm ghost edit-resto">✏️ 編輯</button>
             <button class="btn sm danger del-resto">刪除餐廳</button>
