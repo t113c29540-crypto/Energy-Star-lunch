@@ -491,16 +491,8 @@
     return {
       version:1,
       restaurants:[
-        { id:uid(), name:"巷口便當", phone:"(02)0000-1111", note:"", menu:[
-          {id:uid(),name:"排骨便當",price:90},{id:uid(),name:"雞腿便當",price:100},
-          {id:uid(),name:"焢肉便當",price:85},{id:uid(),name:"魚排便當",price:85},
-          {id:uid(),name:"素食便當",price:75},{id:uid(),name:"控肉飯",price:70},
-        ]},
-        { id:uid(), name:"阿美麵店", phone:"(02)0000-2222", note:"", menu:[
-          {id:uid(),name:"牛肉麵",price:130},{id:uid(),name:"餛飩麵",price:70},
-          {id:uid(),name:"陽春麵",price:50},{id:uid(),name:"乾麵",price:50},
-          {id:uid(),name:"滷味拼盤",price:60},{id:uid(),name:"燙青菜",price:40},
-        ]},
+        Object.assign({id:uid()}, realZhengzhong()),
+        Object.assign({id:uid()}, realShao()),
         { id:uid(), name:"Uber Eats", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.ubereats.com/tw", platform:true, menu:[] },
         { id:uid(), name:"foodpanda", phone:"", note:"外送平台 · App 點餐,品項請自行輸入", link:"https://www.foodpanda.com.tw/", platform:true, menu:[] },
       ],
@@ -522,6 +514,26 @@
     if(/^[\w.-]+\.[a-z]{2,}/i.test(u)) return "https://"+u;
     return "";
   }
+  // 公司(新莊區新北大道三段3號)附近實際店家 — 範例餐廳種子
+  function realZhengzhong(){ return { name:"正忠排骨飯 新莊中華店", phone:"(02)8992-2222", note:"新莊區中華路一段110號 · 10:30–20:00 · 便當約15種,85~150元,價格以現場為準", link:"", platform:false, menu:[
+    {id:uid(),name:"排骨便當",price:90},{id:uid(),name:"雞腿便當",price:110},
+    {id:uid(),name:"控肉便當",price:90},{id:uid(),name:"魚排便當",price:90},
+    {id:uid(),name:"滷雞腿便當",price:110},
+  ] }; }
+  function realShao(){ return { name:"邵湘湘牛肉麵", phone:"0989-379-137", note:"新莊副都心 思源路593巷6弄10號 · 11:00–20:00,週日休", link:"", platform:false, menu:[
+    {id:uid(),name:"A+牛肉麵",price:160},{id:uid(),name:"牛三寶麵",price:190},
+    {id:uid(),name:"麻婆豆腐燴飯",price:80},{id:uid(),name:"綜合小菜",price:60},
+    {id:uid(),name:"涼拌海蜇皮",price:35},{id:uid(),name:"涼拌小黃瓜",price:35},
+  ] }; }
+  // 把舊版假電話範例(0000-1111 / 0000-2222)就地換成真實店家,保留 id;自我冪等
+  function migrateExampleRestaurants(d){
+    if(!Array.isArray(d.restaurants)) return;
+    d.restaurants.forEach(r=>{
+      const ph=(r.phone||"").trim();
+      if(ph==="(02)0000-1111") Object.assign(r, realZhengzhong());
+      else if(ph==="(02)0000-2222") Object.assign(r, realShao());
+    });
+  }
   let DB = loadDB();
   function loadDB(){
     try{
@@ -539,6 +551,7 @@
         ensurePlatform(d,"foodpanda","https://www.foodpanda.com.tw/");
         d._platformsSeeded=true;
       }
+      migrateExampleRestaurants(d);
       return d;
     }catch(e){ console.error(e); return defaultData(); }
   }
